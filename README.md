@@ -1,23 +1,29 @@
+# bullet_fe
 
+## Project setup
+```
+yarn install
+```
 
-## Bullet Front End
-Tasks, Notes, or Events in a kanban board style on top of a Calendar.
+### Compiles and hot-reloads for development
+```
+yarn run serve
+```
 
-Built with Node.js, Vuejs, and deployment with Heroku.
+### Compiles and minifies for production
+```
+yarn run build
+```
 
-## Initialize
+### Run your tests
+```
+yarn run test
+```
 
-`heroku login`
-`heroku git:remote -a bulletjournalapp`
+### Lints and fixes files
+```
+yarn run lint
+```
 
-## Local Development
-`heroku local web`
-
-Development Address
-`http://localhost:5000/`
-
-## Deploy to Production
-`git push heroku master`
-
-Prod Address
-`https://bulletjournalapp.herokuapp.com/`
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).
