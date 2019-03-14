@@ -1,5 +1,8 @@
 <template>
   <div id="app">
+		<div v-if="swDebugging" class="sw-debugging-banner">
+			Service Worker: {{swDebugging}}
+		</div>
     <div id="nav">
       <router-link to="/">Home</router-link> |
 			<router-link :to="{ path: '/' + getCurrentYear + '/' + getCurrentMonth }">Calendar</router-link>
@@ -18,6 +21,12 @@ export default {
 		getCurrentYear() {
 			const thisYear = new Date();
 			return thisYear.getFullYear();
+		},
+
+		// Service Worker Debugging.
+		swDebugging() {
+			const swState = localStorage.getItem('sw_state') || false
+			return swState;
 		}
 	}
 }

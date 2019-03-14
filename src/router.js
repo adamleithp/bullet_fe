@@ -42,7 +42,6 @@ export default new Router({
     },
     {
       path: '/:year/:month',
-      name: 'calendar',
       component: () => import(/* webpackChunkName: "calendar" */ './views/Month.vue'),
       children: monthRoutes
     },
