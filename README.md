@@ -1,29 +1,57 @@
 # bullet_fe
 
-## Project setup
+## Bullet Journal
+Tasks, Notes, or Events in a kanban board style on top of a Calendar.
+
+Built with Node.js, Vuejs / Vue CLI, and deployment with Heroku.
+
+
+### Project setup
 ```
 yarn install
 ```
 
-### Compiles and hot-reloads for development
 ```
-yarn run serve
-```
-
-### Compiles and minifies for production
-```
-yarn run build
+heroku git:remote -a bulletjournalapp
 ```
 
-### Run your tests
+
+### Development
+##### Local Server with Hot Reload
+```
+npm run serve
+```
+
+##### Local Server with Express (For testing production server)
+```
+npm run start
+```
+
+
+### Deploy to Production
+```
+heroku git:remote -a bulletjournalapp
+```
+```
+heroku login
+```
+```
+git push heroku master
+```
+
+##### Production Address
+```
+https://bulletjournalapp.herokuapp.com/
+```
+
+
+
+<!-- ### Run your tests
 ```
 yarn run test
-```
+``` -->
 
 ### Lints and fixes files
 ```
 yarn run lint
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

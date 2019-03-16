@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const express = require('express');
 const serveStatic = require('serve-static');
 
@@ -11,5 +12,5 @@ app.get('*', function (req, res) {
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
-  // console.log('Listening on port ' + port)
+  console.log('Listening on port ' + port)
 });
