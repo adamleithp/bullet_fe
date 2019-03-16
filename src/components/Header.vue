@@ -1,9 +1,6 @@
 <template>
 	<div class="headers">
     <MonthNavigation/>
-		<!-- <YearNavigation/> -->
-
-		<!-- Viewing: {{$route.params.month}}/{{$route.params.year}} -->
   </div>
 </template>
 

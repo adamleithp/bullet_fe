@@ -1,15 +1,8 @@
 <template>
 	<ul class="nav">
 		<li v-for="(month, idx) in months" :key="month">
-			<router-link :to="{ path: '/calendar/' + $route.params.year + '/' + idx }">{{month}}</router-link>
+			<router-link :to="{ path: '/calendar/' + currentMonth + '/' + getDateIndex(idx) }">{{month}} ---</router-link>
 		</li>
-		<!-- <div class="mini-cal">
-			<li v-for="index in 10" :key="index" v-bind:style="{ height: (Math.random() * (12 - 0) + 0) + 'px' }"></li>
-			<li class="mini-cal-today" v-bind:style="{ height: '48px', backgroundColor: '#16c156'}">
-				<span class="">Today</span>
-			</li>
-			<li v-for="index in 10" :key="index" v-bind:style="{ height: (Math.random() * (12 - 0) + 0) + 'px' }"></li>
-		</div> -->
 	</ul>
 </template>
 
@@ -34,9 +27,16 @@ export default {
 	name: 'MonthNavigation',
 	data() {
 		return {
-			months: monthsArray
+			months: monthsArray,
+			currentMonth: this.$route.params.year
 		}
 	},
+	methods: {
+		getDateIndex(idx) {
+			const index = idx + 1;
+			return index
+		}
+	}
 }
 </script>
 

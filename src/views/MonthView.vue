@@ -2,8 +2,7 @@
   <div>
 		<Header/>
 
-		Params: {{$route.params.month}}/{{$route.params.year}}
-    Month View
+		<!-- <h1>{{$route.params.month}}/{{$route.params.year}}</h1> -->
 
 		<DayNavigation/>
 
@@ -20,5 +19,13 @@ export default {
 		Header,
 		DayNavigation
 	},
+	// computed: {
+	// 	getMonthTitle() {
+	// 		var monthNumber = new Date(this.$route.params.year, this.$route.params.month);
+	// 		console.log(monthNumber.getMonth());
+
+	// 		return date
+	// 	},
+	// }
 }
 </script>

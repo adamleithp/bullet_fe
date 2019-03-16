@@ -17,7 +17,7 @@ export default {
 	computed: {
 		getCurrentMonth() {
 			const today = new Date();
-			return (today.getMonth())
+			return (today.getMonth() + 1)
 		},
 		getCurrentYear() {
 			const today = new Date();
