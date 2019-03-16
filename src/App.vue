@@ -5,7 +5,7 @@
 				<router-link :to="{ path: '/' }">Bullet Journal</router-link>
 			</li>
 			<li>
-				<router-link class="link--active" :to="{ path: '/calendar/' + getCurrentYear + '/' + getCurrentMonth }">My Calendar</router-link>
+				<router-link class="link--active" :to="{ path: '/calendar/' + currentYear + '/' + currentMonth }">My Calendar</router-link>
 			</li>
 		</ul>
 		<router-view/>
@@ -13,15 +13,17 @@
 </template>
 
 <script>
+import { getCurrentMonth, getCurrentYear } from '@/common';
+
 export default {
 	computed: {
-		getCurrentMonth() {
-			const today = new Date();
-			return (today.getMonth() + 1)
+		currentMonth() {
+			let month = getCurrentMonth();
+			return month
 		},
-		getCurrentYear() {
-			const today = new Date();
-			return (today.getFullYear())
+		currentYear() {
+			let year = getCurrentYear();
+			return year
 		}
 	}
 }

@@ -1,12 +1,15 @@
 <template>
 	<ul class="nav">
 		<li v-for="(month, idx) in months" :key="month">
-			<router-link :to="{ path: '/calendar/' + currentMonth + '/' + getDateIndex(idx) }">{{month}} ---</router-link>
+			<router-link :to="{ path: '/calendar/' + currentMonth + '/' + getDateIndex(idx) }">
+				{{capitalizeMonth(month)}}
+			</router-link>
 		</li>
 	</ul>
 </template>
 
 <script>
+import {capitalizeString} from '@/common';
 
 const monthsArray = [
   'january',
@@ -35,10 +38,16 @@ export default {
 		getDateIndex(idx) {
 			const index = idx + 1;
 			return index
+		},
+		capitalizeMonth(str) {
+			return capitalizeString(str)
 		}
 	}
 }
 </script>
 
 <style lang="scss" scoped>
+ul {
+	overflow-y: hidden;
+}
 </style>
