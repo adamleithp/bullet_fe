@@ -2,7 +2,7 @@
 
 import { register } from 'register-service-worker'
 
-const debug = true;
+const debug = false;
 const setDebugState = (state) => {
   if (debug && process.env.NODE_ENV === 'production') {
     localStorage.setItem('sw_state', state)
