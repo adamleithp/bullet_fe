@@ -6,7 +6,7 @@
 
     <div id="nav">
       <router-link to="/">Home</router-link> |
-			<router-link :to="{ path: '/' + getCurrentYear + '/' + getCurrentMonth }">Calendar</router-link>
+			<router-link :to="{ path: '/calendar/' + getCurrentYear + '/' + getCurrentMonth }">Calendar</router-link>
     </div>
     <router-view/>
   </div>
