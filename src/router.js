@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from './views/Home.vue'
-import Month from '@/views/Month';
+import HomeView from './views/HomeView.vue'
+import MonthView from '@/views/MonthView';
+import NotFoundView from '@/views/NotFoundView';
 
 Vue.use(Router)
 
@@ -20,14 +21,13 @@ const monthsArray = [
   'decemember',
 ];
 
-// const getDaysInMonth = (month,year) => new Date(year, month, 0).getDate();
 const monthRoutes = [];
 
 monthsArray.forEach((month) => {
   monthRoutes.push({
     path: '',
     name: month,
-    component: Month,
+    component: MonthView,
   });
 });
 
@@ -38,12 +38,13 @@ export default new Router({
     {
       path: '/',
       name: 'home',
-      component: Home
+      component: HomeView
     },
     {
       path: '/:year/:month',
-      component: () => import(/* webpackChunkName: "calendar" */ './views/Month.vue'),
+      component: () => import(/* webpackChunkName: "calendar" */ './views/MonthView.vue'),
       children: monthRoutes
     },
+    { path: '*', component: NotFoundView }
   ]
 })

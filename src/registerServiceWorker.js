@@ -1,11 +1,12 @@
 /* eslint-disable no-console */
-
 import { register } from 'register-service-worker'
 
 const debug = false;
 const setDebugState = (state) => {
   if (debug && process.env.NODE_ENV === 'production') {
     localStorage.setItem('sw_state', state)
+  } else {
+    localStorage.removeItem('sw_state')
   }
 }
 

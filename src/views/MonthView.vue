@@ -15,7 +15,7 @@ import MonthNavigation from '@/components/MonthNavigation.vue'
 import DayNavigation from '@/components/DayNavigation.vue'
 
 export default {
-	name: 'MonthView',
+	name: 'monthView',
   components: {
     YearNavigation,
     MonthNavigation,
