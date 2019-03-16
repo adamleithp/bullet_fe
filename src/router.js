@@ -45,6 +45,8 @@ export default new Router({
       component: () => import(/* webpackChunkName: "calendar" */ './views/MonthView.vue'),
       children: monthRoutes
     },
-    { path: '*', component: NotFoundView }
+    {
+      path: '*', component: NotFoundView
+    }
   ]
 })
