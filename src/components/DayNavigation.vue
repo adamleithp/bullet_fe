@@ -42,17 +42,20 @@
 					</li> -->
 
 
-
 					<!-- Card Create ///////////////////////////////////////////////////////////////////////// -->
 					<li>
 						<button
 							type="button"
 							class="button button--add"
-							:title="`Add a card on ${getDayTitle(idx)}`">
+							:title="`Add a card on ${getDayTitle(idx)}`"
+							@click="handleShowAdd(idx)"
+							v-show="addingCardIndex !== idx">
 							Add Card
 						</button>
 
-						<form v-on:submit.prevent="handleCardFormSubmit">
+						<form
+							v-if="addingCardIndex === idx"
+							v-on:submit.prevent="handleCardFormSubmit">
 							<textarea-autosize
 								class="input"
 								:min-height="24"
@@ -101,6 +104,7 @@
 									<button
 										type="button"
 										class="button"
+										@click="handleHideAdd(idx)"
 										title="Click, then Press E for event, Press T for task, Press N for note">
 										Cancel
 									</button>
@@ -121,6 +125,12 @@ import { getDaysInMonth, getCurrentDay, getCurrentMonth, getCurrentYear } from '
 
 export default {
 	name: 'DayNavigation',
+	data() {
+		return {
+			addingCardActive: false,
+			addingCardIndex: null,
+		}
+	},
 	computed: {
 		daysInMonth() {
 			return getDaysInMonth(this.$route.params.year, this.$route.params.month);
@@ -150,9 +160,22 @@ export default {
 		},
 
 		// Card Create methods
+		/////////////////////////////////////
+
+		// Click "Add Card"
+		handleShowAdd(idx) {
+			this.addingCardActive = true;
+			this.addingCardIndex = idx;
+		},
+		handleHideAdd(idx) {
+			this.addingCardActive = false;
+			this.addingCardIndex = null;
+		},
+		// Card Add Submit
 		handleCardFormSubmit() {
 			console.log('Pass data!');
 		},
+		// Prevent Enter on textarea
 		handleTextareaEnter(event) {
 			event.preventDefault()
 			this.handleCardFormSubmit()
