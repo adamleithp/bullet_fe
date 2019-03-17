@@ -34,6 +34,7 @@ export default {
 @import './styles/global.scss';
 
 body {
+	font-size: 14px;
 	background: #222;
 	font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
