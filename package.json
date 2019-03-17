@@ -18,6 +18,9 @@
     "eslint": "^5.8.0",
     "eslint-plugin-vue": "^5.0.0",
     "express": "^4.16.4",
+    "graphql": "^14.1.1",
+    "graphql-request": "^1.8.2",
+    "graphql-tag": "^2.10.1",
     "luxon": "^1.11.4",
     "node-sass": "^4.9.0",
     "register-service-worker": "^1.6.2",
@@ -25,6 +28,7 @@
     "serve-static": "^1.13.2",
     "vue": "^2.6.6",
     "vue-router": "^3.0.1",
+    "vue-smooth-dnd": "^0.3.0",
     "vue-template-compiler": "^2.5.21",
     "vue-textarea-autosize": "^1.0.4",
     "vuex": "^3.0.1"

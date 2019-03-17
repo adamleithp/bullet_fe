@@ -2,11 +2,35 @@
   <div>
 		<ul id="days-list" class="day-list">
 			<li
-				v-for="(idx) in daysInMonth" :key="idx"
+				v-for="(day, idx) in scene.days" :key="idx"
 				:class="{'day-today': isCurrentDay(idx)}">
 				<h1 class="title">{{getDayTitle(idx)}}</h1>
 
 				<ul class="cards-list">
+					<li
+						v-for="(card) in day.cards" :key="card.id">
+						<button class="card card--icon">
+              <svg v-if="card.type === 'task'" class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <title>Task</title>
+                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><circle fill="#fff" fill-rule="nonzero" cx="12" cy="12" r="4"></circle></g>
+              </svg>
+              <svg v-if="card.type === 'event'" class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <title>Event</title>
+								<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                  <circle stroke="#fff" stroke-width="2" fill-rule="nonzero" cx="12" cy="12" r="4"></circle>
+                </g>
+              </svg>
+              <svg v-if="card.type === 'note'" class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+								<title>Note</title>
+                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                  <g transform="translate(7.000000, 11.000000)" fill="#fff">
+                    <polygon points="10 2 0 2 0 0 10 0"></polygon>
+                  </g>
+                </g>
+							</svg>
+              <p class="text">{{card.name}}</p>
+            </button>
+					</li>
 					<!-- <li>
 						<button class="card card--icon">
               <svg class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -104,7 +128,7 @@
 									<button
 										type="button"
 										class="button"
-										@click="handleHideAdd(idx)"
+										@click="handleHideAdd()"
 										title="Click, then Press E for event, Press T for task, Press N for note">
 										Cancel
 									</button>
@@ -120,17 +144,47 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import { DateTime } from 'luxon';
-import { getDaysInMonth, getCurrentDay, getCurrentMonth, getCurrentYear } from '@/common';
+// import { Container, Draggable } from "vue-smooth-dnd";
+import { getDaysInMonth, getCurrentDay, getCurrentMonth, getCurrentYear, isCurrentMonth } from '@/common';
 
 export default {
 	name: 'DayNavigation',
 	data() {
 		return {
+			scene: [],
 			addingCardActive: false,
 			addingCardIndex: null,
 		}
 	},
+
+	// components: {
+  //   Container,
+  //   Draggable
+  // },
+
+	created() {
+		this.$store.dispatch('getCardsOfThisMonth', {
+			year: Number(this.$route.params.year),
+			month: Number(this.$route.params.month)
+		})
+
+		const daysInMonth = getDaysInMonth(this.$route.params.year, this.$route.params.month);
+		let sceneArray = [];
+
+		// Build Scene for days of month.
+		for (let i = 0; i < daysInMonth; i++) {
+			const cardsForToday = this.cards.filter(card => card.date.day_number === i);
+			sceneArray.push({
+				cards: cardsForToday,
+			});
+		}
+		this.scene = {
+			days: sceneArray
+		};
+	},
+
 	computed: {
 		daysInMonth() {
 			return getDaysInMonth(this.$route.params.year, this.$route.params.month);
@@ -142,8 +196,17 @@ export default {
 		currentYear() {
 			let year = getCurrentYear();
 			return year
-		}
+		},
+
+
+		// Build Scene
+		...mapState({
+			cards: state => state.cards
+		})
 	},
+
+
+
 	methods: {
 		isCurrentDay(idx) {
 			const isToday = getCurrentDay(Number(this.$route.params.year), Number(this.$route.params.month), idx);
@@ -154,9 +217,11 @@ export default {
 			return `${idx}. ${weekday}`
 		},
 		scrollToToday() {
-			let content = document.querySelector('#days-list');
-			let today = document.querySelector('.day-today');
-			content.scrollLeft += (today.offsetLeft - ((document.body.clientWidth / 2) - (today.offsetWidth / 2) ));
+			if (isCurrentMonth(Number(this.$route.params.year), Number(this.$route.params.month))) {
+				let content = document.querySelector('#days-list');
+				let today = document.querySelector('.day-today');
+				content.scrollLeft += (today.offsetLeft - ((document.body.clientWidth / 2) - (today.offsetWidth / 2) ));
+			}
 		},
 
 		// Card Create methods
@@ -167,20 +232,19 @@ export default {
 			this.addingCardActive = true;
 			this.addingCardIndex = idx;
 		},
-		handleHideAdd(idx) {
+		handleHideAdd() {
 			this.addingCardActive = false;
 			this.addingCardIndex = null;
 		},
 		// Card Add Submit
-		handleCardFormSubmit() {
-			console.log('Pass data!');
-		},
+		handleCardFormSubmit() {},
 		// Prevent Enter on textarea
 		handleTextareaEnter(event) {
 			event.preventDefault()
 			this.handleCardFormSubmit()
     }
 	},
+
 	mounted() {
 		this.scrollToToday();
 	},
@@ -208,7 +272,7 @@ $card-column-width: 300px;
 		width: $card-column-width;
 		width: 100%;
 		flex: 0 0 100%;
-		// scroll-snap-align: center;
+		scroll-snap-align: center;
 		height: calc(100vh - 100px);
 		overflow: scroll;
 
@@ -261,15 +325,17 @@ $card-add--color: #333;
 	width: 100%;
 	line-height: 24px;
 	align-items: center;
+	color: #fff;
 
 	.input, .text {
 		@extend .font-style;
 		font-weight: 500;
-		font-size: 1.4rem;
+		font-size: 1rem;
 		line-height: 24px;
 		font-style: normal;
 		margin: 0;
 		align-items: center;
+		text-align: left;
 	}
 
 	.input {
@@ -320,6 +386,7 @@ $card-add--color: #333;
 	// opacity: .2;
 	transition: opacity .2s ease-in-out;
 	margin-bottom: 1rem;
+	margin-top: 1rem;
 
 	&:hover,
   &:focus {
