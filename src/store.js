@@ -3,7 +3,8 @@
 
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { GraphQLClient } from 'graphql-request'
+import axios from 'axios'
+import querystring from 'querystring'
 
 Vue.use(Vuex)
 
@@ -79,20 +80,32 @@ export default new Vuex.Store({
   },
   actions: {
     async getCardsOfThisMonth({ commit }, year, month) {
-      // const endpoint = 'https://9o9ra2vwl6.execute-api.us-east-1.amazonaws.com/Prod'
-      // const graphQLClient = new GraphQLClient(endpoint, {
-      //   credentials: 'include',
-      //   mode: 'cors',
-      //   headers: {
-      //     'Content-Type': 'application/x-www-form-urlencoded',
-      //   },
-      // })
-
-      // const data = await graphQLClient.request(query)
-      // console.log(JSON.stringify(data, undefined, 2))
-
+      console.log('called!!');
 
       commit('setMonthCards', fakeData)
+      const stringify = JSON.stringify(query)
+      const endpoint = `https://9o9ra2vwl6.execute-api.us-east-1.amazonaws.com/Prod/cards?query=${encodeURIComponent(query)}`;
+
+      console.log('endpoint', endpoint);
+      console.log('year, month', year, month);
+
+      try {
+        var result = await axios({
+            method: "GET",
+            url: endpoint ,
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'GET,HEAD,OPTIONS,POST,PUT',
+              'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+              'Content-Type': 'application/json',
+              'withCredentials': true
+            }
+        });
+
+        console.log(result.data);
+      } catch (error) {
+          console.error(error);
+      }
     },
   }
 })

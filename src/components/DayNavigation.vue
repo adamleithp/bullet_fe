@@ -2,7 +2,7 @@
   <div>
 		<ul id="days-list" class="day-list">
 			<li
-				v-for="(day, idx) in scene.days" :key="idx"
+				v-for="(day, idx) in scene.days" :key="`${idx}-${Math.random()}`"
 				:class="{'day-today': isCurrentDay(idx)}">
 				<h1 class="title">{{getDayTitle(idx)}}</h1>
 
@@ -171,15 +171,23 @@ export default {
 		})
 
 		const daysInMonth = getDaysInMonth(this.$route.params.year, this.$route.params.month);
+
 		let sceneArray = [];
 
 		// Build Scene for days of month.
-		for (let i = 0; i < daysInMonth; i++) {
-			const cardsForToday = this.cards.filter(card => card.date.day_number === i);
+		for (let i = 1; i < daysInMonth; i++) {
+			const cardsForToday = this.cards.filter(card => {
+			// console.log('card.date.month_number', card.date.month_number);
+				return (card.date.month_number == this.$route.params.month && card.date.day_number === i)
+			});
+			// console.log('cardsForToday', cardsForToday);
+
 			sceneArray.push({
 				cards: cardsForToday,
 			});
 		}
+
+		// TODO: make Days have a unique ID so we can pass it to :key and force a rerender of the days.
 		this.scene = {
 			days: sceneArray
 		};
@@ -209,19 +217,21 @@ export default {
 
 	methods: {
 		isCurrentDay(idx) {
+			idx = idx + 1;
 			const isToday = getCurrentDay(Number(this.$route.params.year), Number(this.$route.params.month), idx);
 			return isToday
 		},
 		getDayTitle(idx) {
+			idx = idx + 1;
 			const weekday = DateTime.local(Number(this.$route.params.year), Number(this.$route.params.month), idx).weekdayShort;
 			return `${idx}. ${weekday}`
 		},
 		scrollToToday() {
-			if (isCurrentMonth(Number(this.$route.params.year), Number(this.$route.params.month))) {
-				let content = document.querySelector('#days-list');
-				let today = document.querySelector('.day-today');
-				content.scrollLeft += (today.offsetLeft - ((document.body.clientWidth / 2) - (today.offsetWidth / 2) ));
-			}
+			// if (isCurrentMonth(Number(this.$route.params.year), Number(this.$route.params.month))) {
+			// 	let content = document.querySelector('#days-list');
+			// 	let today = document.querySelector('.day-today');
+			// 	content.scrollLeft += (today.offsetLeft - ((document.body.clientWidth / 2) - (today.offsetWidth / 2) ));
+			// }
 		},
 
 		// Card Create methods
