@@ -2,7 +2,7 @@
   <div>
 		<ul id="days-list" class="day-list">
 			<li
-				v-for="(day, idx) in scene.days" :key="`${idx}-${Math.random()}`"
+				v-for="(day, idx) in scene.days" :key="`${day.id}`"
 				:class="{'day-today': isCurrentDay(idx)}">
 				<h1 class="title">{{getDayTitle(idx)}}</h1>
 
@@ -147,7 +147,7 @@
 import { mapState } from 'vuex';
 import { DateTime } from 'luxon';
 // import { Container, Draggable } from "vue-smooth-dnd";
-import { getDaysInMonth, getCurrentDay, getCurrentMonth, getCurrentYear, isCurrentMonth } from '@/common';
+import { getDaysInMonth, getCurrentDay, getCurrentMonth, getCurrentYear } from '@/common';
 
 export default {
 	name: 'DayNavigation',
@@ -159,38 +159,28 @@ export default {
 		}
 	},
 
+
+	watch: {
+    '$route' (to, from) {
+
+			if (from !== to) {
+				this.buildScene();
+			}
+
+			console.log('from', from);
+			console.log('ttoo', to);
+
+      // react to route changes...
+    }
+	},
+
 	// components: {
   //   Container,
   //   Draggable
-  // },
+	// },
 
 	created() {
-		this.$store.dispatch('getCardsOfThisMonth', {
-			year: Number(this.$route.params.year),
-			month: Number(this.$route.params.month)
-		})
-
-		const daysInMonth = getDaysInMonth(this.$route.params.year, this.$route.params.month);
-
-		let sceneArray = [];
-
-		// Build Scene for days of month.
-		for (let i = 1; i < daysInMonth; i++) {
-			const cardsForToday = this.cards.filter(card => {
-			// console.log('card.date.month_number', card.date.month_number);
-				return (card.date.month_number == this.$route.params.month && card.date.day_number === i)
-			});
-			// console.log('cardsForToday', cardsForToday);
-
-			sceneArray.push({
-				cards: cardsForToday,
-			});
-		}
-
-		// TODO: make Days have a unique ID so we can pass it to :key and force a rerender of the days.
-		this.scene = {
-			days: sceneArray
-		};
+		this.buildScene();
 	},
 
 	computed: {
@@ -234,6 +224,35 @@ export default {
 			// }
 		},
 
+
+		buildScene() {
+			this.$store.dispatch('getCardsOfThisMonth', {
+				year: Number(this.$route.params.year),
+				month: Number(this.$route.params.month)
+			})
+
+			const daysInMonth = getDaysInMonth(this.$route.params.year, this.$route.params.month);
+
+			let daysArray = [];
+
+			// Build Scene for days of month.
+			for (let i = 1; i < daysInMonth; i++) {
+				const cardsForToday = this.cards.filter(card => {
+					return (card.date.month_number == this.$route.params.month && card.date.day_number === i)
+				});
+
+				daysArray.push({
+					id: `${this.$route.params.month}-${i}`,
+					cards: cardsForToday,
+				});
+			}
+
+			// TODO: make Days have a unique ID so we can pass it to :key and force a rerender of the days.
+			this.scene = {
+				days: daysArray
+			};
+		},
+
 		// Card Create methods
 		/////////////////////////////////////
 
@@ -255,9 +274,6 @@ export default {
     }
 	},
 
-	mounted() {
-		this.scrollToToday();
-	},
 }
 </script>
 
