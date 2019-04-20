@@ -1,14 +1,23 @@
 <template>
   <div>
+
 		<ul id="days-list" class="day-list">
 			<li
 				v-for="(day, idx) in scene.days" :key="`${day.id}`"
 				:class="{'day-today': isCurrentDay(idx)}">
 				<h1 class="title">{{getDayTitle(idx)}}</h1>
 
-				<ul class="cards-list">
-					<li
-						v-for="(card) in day.cards" :key="card.id">
+
+				<Container
+            group-name="col"
+						class="cards-list"
+						tag="ul"
+            @drop="(e) => onCardDrop(day.id, e)"
+            drag-class="card-ghost"
+            drop-class="card-ghost-drop"
+            :get-child-payload="getCardPayload(day.id)"
+          >
+					<Draggable v-for="(card) in day.cards" :key="card.id">
 						<button class="card card--icon">
               <svg v-if="card.type === 'task'" class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <title>Task</title>
@@ -30,7 +39,11 @@
 							</svg>
               <p class="text">{{card.name}}</p>
             </button>
-					</li>
+					</Draggable>
+				</Container>
+
+				<ul class="cards-list">
+
 					<!-- <li>
 						<button class="card card--icon">
               <svg class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -146,8 +159,8 @@
 <script>
 import { mapState } from 'vuex';
 import { DateTime } from 'luxon';
-// import { Container, Draggable } from "vue-smooth-dnd";
-import { getDaysInMonth, getCurrentDay, getCurrentMonth, getCurrentYear } from '@/common';
+import { Container, Draggable } from "vue-smooth-dnd";
+import { getDaysInMonth, getCurrentDay, getCurrentMonth, getCurrentYear, applyDrag } from '@/common';
 
 export default {
 	name: 'DayNavigation',
@@ -159,31 +172,36 @@ export default {
 		}
 	},
 
+	components: {
+    Container,
+    Draggable
+	},
+
 
 	watch: {
     '$route' (to, from) {
-
 			if (from !== to) {
 				this.buildScene();
 			}
-
-			console.log('from', from);
-			console.log('ttoo', to);
-
-      // react to route changes...
-    }
+		},
+		// Watch for cards state change, then call build.
+		cards(newValue, oldValue) {
+      if (newValue) {
+				this.buildScene();
+      }
+    },
 	},
 
-	// components: {
-  //   Container,
-  //   Draggable
-	// },
-
-	created() {
-		this.buildScene();
+	beforeCreate() {
+		this.$store.dispatch('getCardsOfThisMonth');
 	},
 
 	computed: {
+		// Build Scene
+		...mapState({
+			cards: state => state.cards
+		}),
+
 		daysInMonth() {
 			return getDaysInMonth(this.$route.params.year, this.$route.params.month);
 		},
@@ -195,12 +213,6 @@ export default {
 			let year = getCurrentYear();
 			return year
 		},
-
-
-		// Build Scene
-		...mapState({
-			cards: state => state.cards
-		})
 	},
 
 
@@ -226,11 +238,6 @@ export default {
 
 
 		buildScene() {
-			this.$store.dispatch('getCardsOfThisMonth', {
-				year: Number(this.$route.params.year),
-				month: Number(this.$route.params.month)
-			})
-
 			const daysInMonth = getDaysInMonth(this.$route.params.year, this.$route.params.month);
 
 			let daysArray = [];
@@ -267,10 +274,92 @@ export default {
 		},
 		// Card Add Submit
 		handleCardFormSubmit() {},
+
 		// Prevent Enter on textarea
 		handleTextareaEnter(event) {
 			event.preventDefault()
 			this.handleCardFormSubmit()
+		},
+
+		// Save Reordering here!
+		handleDayChange: function(dayId, dayArray) {
+      let cardIds = [];
+      for (let i = 0; i < dayArray.length; i++) {
+        cardIds.push(dayArray[i].id);
+			}
+
+			// console.log(cardIds, cardIds);
+
+
+      // try {
+      //   this.$apollo.mutate({
+      //     mutation: gql`
+      //       mutation editEventPosition($day_id: String, $day_array: [String]) {
+      //         editEventPosition(day_id: $day_id, day_array: $day_array) {
+      //           id
+      //           title
+      //         }
+      //       }
+      //     `,
+      //     variables: {
+      //       day_id: dayId,
+      //       day_array: EventsIds
+      //     },
+      //     update: (store, { data: { editEventPosition } }) => {
+			// 			console.log('success');
+
+      //       // this.resetCardAdding();
+      //     }
+      //   });
+      // } catch (e) {
+      //   console.error();
+      // }
+		},
+
+
+		getCardPayload(dayId) {
+			// console.log(this.scene.days.filter(p => p.id === dayId));
+
+      return index => {
+        return this.scene.days.filter(p => p.id === dayId)[
+          index
+        ];
+      };
+		},
+
+		onCardDrop(dayId, dropResult) {
+      if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
+
+				// console.log('dayId, dropResult', dayId, dropResult);
+
+				const scene = Object.assign({}, this.scene);
+				const column = scene.days.filter(p => p.id === dayId)[0];
+
+				// console.log('columncolumncolumn', column);
+
+        const columnIndex = scene.days.indexOf(column);
+        const newColumn = Object.assign({}, column);
+				newColumn.cards = applyDrag(newColumn.cards, dropResult);
+
+				// console.log('columnIndex', columnIndex);
+				console.log('columnIndex newColumn', columnIndex, newColumn);
+
+				scene.days.splice(columnIndex, 1, newColumn);
+
+				console.log('scene.days', scene.days);
+
+
+        // TODO: HAve below function return order, and update UI that way... or
+        // atleast do error handling if API timeoput
+
+        // Pass Column ID
+        // Pass Columns Children...
+        // this.handleDayChange(column.id, newColumn.cards);
+				console.log(scene);
+
+        // UI setting.
+        this.scene = scene;
+      }
     }
 	},
 
@@ -338,6 +427,11 @@ $card-column-width: 300px;
   font-style: normal;
 }
 
+
+
+.smooth-dnd-container {
+	min-height: 100px;
+}
 // Card Styles
 /////////////////////////////////////
 $card-add--color: #333;
