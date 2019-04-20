@@ -18,6 +18,7 @@
             :get-child-payload="getCardPayload(day.id)"
           >
 					<Draggable v-for="(card) in day.cards" :key="card.id">
+						ITEM {{card.name}}
 						<button class="card card--icon">
               <svg v-if="card.type === 'task'" class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <title>Task</title>
@@ -238,6 +239,8 @@ export default {
 
 
 		buildScene() {
+			console.log('BUILD');
+
 			const daysInMonth = getDaysInMonth(this.$route.params.year, this.$route.params.month);
 
 			let daysArray = [];
@@ -318,8 +321,6 @@ export default {
 
 
 		getCardPayload(dayId) {
-			// console.log(this.scene.days.filter(p => p.id === dayId));
-
       return index => {
         return this.scene.days.filter(p => p.id === dayId)[
           index
@@ -327,27 +328,33 @@ export default {
       };
 		},
 
-		onCardDrop(dayId, dropResult) {
+		onCardDrop(columnId, dropResult) {
       if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
-
-				// console.log('dayId, dropResult', dayId, dropResult);
-
+				// the whole scene, makes the view.
 				const scene = Object.assign({}, this.scene);
-				const column = scene.days.filter(p => p.id === dayId)[0];
 
-				// console.log('columncolumncolumn', column);
+				// The data of the column, {id: 3-0, cards: []}
+				const columnData = scene.days.filter(p => p.id === columnId)[0];
+				// console.log('columnData', columnData);
 
-        const columnIndex = scene.days.indexOf(column);
-        const newColumn = Object.assign({}, column);
-				newColumn.cards = applyDrag(newColumn.cards, dropResult);
+				// the column index, 0, 1, 2
+				const columnIndex = scene.days.indexOf(columnData);
 
-				// console.log('columnIndex', columnIndex);
-				console.log('columnIndex newColumn', columnIndex, newColumn);
+				// The data of the new column, {id: 3-1, cards: []}
+				const newColumnData = Object.assign({}, columnData);
 
-				scene.days.splice(columnIndex, 1, newColumn);
+				newColumnData.cards = applyDrag(newColumnData.cards, dropResult);
 
-				console.log('scene.days', scene.days);
+				// Hacky shit, becuase assign {} nests the cards for some reason...
+				if (newColumnData.cards.length === 1) {
+					if (newColumnData.cards[0].cards) {
+						console.log('is nested...');
+						newColumnData.cards = newColumnData.cards[0].cards;
+					}
+				}
 
+				// Add data to day array, (remove if newColumn data is empty, add if has data.)
+				scene.days.splice(columnIndex, 1, newColumnData);
 
         // TODO: HAve below function return order, and update UI that way... or
         // atleast do error handling if API timeoput
@@ -355,7 +362,7 @@ export default {
         // Pass Column ID
         // Pass Columns Children...
         // this.handleDayChange(column.id, newColumn.cards);
-				console.log(scene);
+				// console.log(scene);
 
         // UI setting.
         this.scene = scene;

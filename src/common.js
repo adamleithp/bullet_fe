@@ -53,8 +53,6 @@ export const applyDrag = (arr, dragResult) => {
 
 	let itemToAdd = payload
 
-	console.log('itemToAdd', itemToAdd);
-
 	if (removedIndex !== null) {
 		itemToAdd = result.splice(removedIndex, 1)[0]
 	}
@@ -62,7 +60,6 @@ export const applyDrag = (arr, dragResult) => {
 	if (addedIndex !== null) {
 		result.splice(addedIndex, 0, itemToAdd)
 	}
-	console.log('result', result);
 
 	return result
   }
