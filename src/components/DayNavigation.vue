@@ -18,7 +18,8 @@
             :get-child-payload="getCardPayload(day.id)"
           >
 					<Draggable v-for="(card) in day.cards" :key="card.id">
-						ITEM {{card.name}}
+
+						card ID: {{card.id}}
 						<button class="card card--icon">
               <svg v-if="card.type === 'task'" class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <title>Task</title>
@@ -96,6 +97,7 @@
 							v-on:submit.prevent="handleCardFormSubmit">
 							<textarea-autosize
 								class="input"
+								v-model="newTitle"
 								:min-height="24"
 								:max-height="(24*4)"
 								placeholder="type some text"
@@ -107,7 +109,7 @@
 								<li>
 									<p>
 										<label :for="`type-note-${idx}`">
-											<input type="radio" name="card-type" :id="`type-note-${idx}`" checked>Note
+											<input v-model="newType" type="radio" name="card-type" :id="`type-note-${idx}`" checked>Note
 										</label>
 									</p>
 								</li>
@@ -115,7 +117,7 @@
 								<li>
 									<p>
 										<label :for="`type-task-${idx}`">
-											<input type="radio" name="card-type" :id="`type-task-${idx}`">Task
+											<input v-model="newType" type="radio" name="card-type" :id="`type-task-${idx}`">Task
 										</label>
 									</p>
 								</li>
@@ -123,7 +125,7 @@
 								<li>
 									<p>
 										<label :for="`type-event-${idx}`">
-											<input type="radio" name="card-type" :id="`type-event-${idx}`">Event
+											<input v-model="newType" type="radio" name="card-type" :id="`type-event-${idx}`">Event
 										</label>
 									</p>
 								</li>
@@ -170,6 +172,8 @@ export default {
 			scene: [],
 			addingCardActive: false,
 			addingCardIndex: null,
+			newTitle: '',
+			newType: null
 		}
 	},
 
@@ -239,8 +243,6 @@ export default {
 
 
 		buildScene() {
-			console.log('BUILD');
-
 			const daysInMonth = getDaysInMonth(this.$route.params.year, this.$route.params.month);
 
 			let daysArray = [];
@@ -276,7 +278,21 @@ export default {
 			this.addingCardIndex = null;
 		},
 		// Card Add Submit
-		handleCardFormSubmit() {},
+		handleCardFormSubmit() {
+			if (this.newTitle === '') {
+				console.log('title cannot be empty');
+
+				return;
+			}
+
+			this.$store.dispatch('createCardOnThisDay', {
+				title: this.newTitle,
+				type: 'note',
+				day: 1,
+				month: 3,
+				year: 2019,
+			});
+		},
 
 		// Prevent Enter on textarea
 		handleTextareaEnter(event) {
@@ -321,8 +337,8 @@ export default {
 
 
 		getCardPayload(dayId) {
-      return index => {
-        return this.scene.days.filter(p => p.id === dayId)[
+			return index => {
+        return this.scene.days.filter(p => p.id === dayId)[0].cards[
           index
         ];
       };
@@ -330,39 +346,12 @@ export default {
 
 		onCardDrop(columnId, dropResult) {
       if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
-				// the whole scene, makes the view.
 				const scene = Object.assign({}, this.scene);
-
-				// The data of the column, {id: 3-0, cards: []}
-				const columnData = scene.days.filter(p => p.id === columnId)[0];
-				// console.log('columnData', columnData);
-
-				// the column index, 0, 1, 2
-				const columnIndex = scene.days.indexOf(columnData);
-
-				// The data of the new column, {id: 3-1, cards: []}
-				const newColumnData = Object.assign({}, columnData);
-
-				newColumnData.cards = applyDrag(newColumnData.cards, dropResult);
-
-				// Hacky shit, becuase assign {} nests the cards for some reason...
-				if (newColumnData.cards.length === 1) {
-					if (newColumnData.cards[0].cards) {
-						console.log('is nested...');
-						newColumnData.cards = newColumnData.cards[0].cards;
-					}
-				}
-
-				// Add data to day array, (remove if newColumn data is empty, add if has data.)
-				scene.days.splice(columnIndex, 1, newColumnData);
-
-        // TODO: HAve below function return order, and update UI that way... or
-        // atleast do error handling if API timeoput
-
-        // Pass Column ID
-        // Pass Columns Children...
-        // this.handleDayChange(column.id, newColumn.cards);
-				// console.log(scene);
+        const column = scene.days.filter(p => p.id === columnId)[0];
+        const columnIndex = scene.days.indexOf(column);
+        const newColumn = Object.assign({}, column);
+        newColumn.cards = applyDrag(newColumn.cards, dropResult);
+        scene.days.splice(columnIndex, 1, newColumn);
 
         // UI setting.
         this.scene = scene;
