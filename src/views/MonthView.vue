@@ -4,7 +4,6 @@
 			LOADING
 		</div>
 
-		{{loading}}
 		<MonthNavigation/>
 		<DayNavigation/>
   </div>
@@ -52,6 +51,9 @@ export default {
 	bottom: 0;
 	left: 0;
 	z-index: 1;
-	opacity: .5;
+	opacity: 0.8;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 </style>

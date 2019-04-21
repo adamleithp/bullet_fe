@@ -1,5 +1,28 @@
 @import './reset.scss';
 
+
+.clip {
+	position: absolute !important;
+	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+	clip: rect(1px, 1px, 1px, 1px);
+}
+
+.flex {
+	display: flex;
+}
+
+.button {
+	-webkit-appearance: none;
+	background: #fff;
+	border-radius: 5px;
+	line-height: 24px;
+	padding: 0 0.5rem;
+	border: 0;
+	cursor: pointer;
+	user-select: none;
+}
+
+
 .nav {
 	display: flex;
 	flex: none;

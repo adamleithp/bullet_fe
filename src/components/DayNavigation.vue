@@ -5,84 +5,62 @@
 			<li
 				v-for="(day, idx) in scene.days" :key="`${day.id}`"
 				:class="{'day-today': isCurrentDay(idx)}">
+
+				<!-- Column title -->
 				<h1 class="title">{{getDayTitle(idx)}}</h1>
 
-
 				<Container
-            group-name="col"
-						class="cards-list"
-						tag="ul"
-            @drop="(e) => onCardDrop(day.id, e)"
-            drag-class="card-ghost"
-            drop-class="card-ghost-drop"
-            :get-child-payload="getCardPayload(day.id)"
-          >
-					<Draggable v-for="(card) in day.cards" :key="card.id">
-
-						card ID: {{card.id}}
+					group-name="col"
+					class="cards-list"
+					tag="ul"
+					@drop="(e) => onCardDrop(day.id, e)"
+					drag-class="card--dragging"
+					drop-class="card--dropping"
+					:get-child-payload="getCardPayload(day.id)">
+					<Draggable
+						v-for="(card) in day.cards"
+						:key="card.id"
+						drag-class="card--dragging">
 						<button class="card card--icon">
-              <svg v-if="card.type === 'task'" class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                <title>Task</title>
-                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><circle fill="#fff" fill-rule="nonzero" cx="12" cy="12" r="4"></circle></g>
-              </svg>
-              <svg v-if="card.type === 'event'" class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                <title>Event</title>
-								<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                  <circle stroke="#fff" stroke-width="2" fill-rule="nonzero" cx="12" cy="12" r="4"></circle>
-                </g>
-              </svg>
-              <svg v-if="card.type === 'note'" class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-								<title>Note</title>
-                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                  <g transform="translate(7.000000, 11.000000)" fill="#fff">
-                    <polygon points="10 2 0 2 0 0 10 0"></polygon>
-                  </g>
-                </g>
-							</svg>
+              <div class="flex">
+								<!-- This is for if you copy the column for exporting -->
+								<span class="clip">{{card.type}}:</span>
+
+								<!-- card icons -->
+								<svg v-if="card.type === 'task'" class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+									<title>Task</title>
+									<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><circle fill="#fff" fill-rule="nonzero" cx="12" cy="12" r="4"></circle></g>
+								</svg>
+
+								<svg v-if="card.type === 'event'" class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+									<title>Event</title>
+									<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+										<circle stroke="#fff" stroke-width="2" fill-rule="nonzero" cx="12" cy="12" r="4"></circle>
+									</g>
+								</svg>
+
+								<svg v-if="card.type === 'note'" class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+									<title>Note</title>
+									<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+										<g transform="translate(7.000000, 11.000000)" fill="#fff">
+											<polygon points="10 2 0 2 0 0 10 0"></polygon>
+										</g>
+									</g>
+								</svg>
+
+							</div>
+
+							<!-- Card title -->
               <p class="text">{{card.name}}</p>
             </button>
 					</Draggable>
 				</Container>
 
+				<!-- Card Create -->
 				<ul class="cards-list">
-
-					<!-- <li>
-						<button class="card card--icon">
-              <svg class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                <title>Task</title>
-                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><circle fill="#000000" fill-rule="nonzero" cx="12" cy="12" r="4"></circle></g>
-              </svg>
-              <p class="text">Task Title</p>
-            </button>
-					</li>
 					<li>
-						<button class="card card--icon">
-              <svg class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                <title>Event</title>
-                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                  <circle stroke="#000000" stroke-width="2" fill-rule="nonzero" cx="12" cy="12" r="4"></circle>
-                </g>
-              </svg>
-              <p class="text">Event Title</p>
-            </button>
-					</li>
-					<li>
-						<button class="card card--icon">
-              <svg class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                <title>Note</title>
-                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                  <g transform="translate(7.000000, 11.000000)" fill="#000000">
-                    <polygon points="10 2 0 2 0 0 10 0"></polygon>
-                  </g>
-                </g>
-              </svg>
-              <p class="text">Note Title</p>
-            </button>
-					</li> -->
 
-
-					<!-- Card Create ///////////////////////////////////////////////////////////////////////// -->
-					<li>
+						<!-- Click to show form -->
 						<button
 							type="button"
 							class="button button--add"
@@ -92,24 +70,32 @@
 							Add Card
 						</button>
 
+						<!-- Card create form -->
 						<form
 							v-if="addingCardIndex === idx"
 							v-on:submit.prevent="handleCardFormSubmit">
+
 							<textarea-autosize
 								class="input"
 								v-model="newTitle"
-								:min-height="24"
-								:max-height="(24*4)"
 								placeholder="type some text"
 								rows="1"
 								@keydown.native.13="handleTextareaEnter"
+								v-focus
 							></textarea-autosize>
 
+							<!-- Card create type radios -->
 							<ul class="card__type-list">
 								<li>
 									<p>
 										<label :for="`type-note-${idx}`">
-											<input v-model="newType" type="radio" name="card-type" :id="`type-note-${idx}`" checked>Note
+											<input
+												type="radio"
+												name="card-type"
+												:id="`type-note-${idx}`"
+												v-model="newType"
+												value="note">
+												Note
 										</label>
 									</p>
 								</li>
@@ -117,7 +103,13 @@
 								<li>
 									<p>
 										<label :for="`type-task-${idx}`">
-											<input v-model="newType" type="radio" name="card-type" :id="`type-task-${idx}`">Task
+											<input
+												type="radio"
+												name="card-type"
+												:id="`type-task-${idx}`"
+												v-model="newType"
+												value="task">
+												Task
 										</label>
 									</p>
 								</li>
@@ -125,17 +117,24 @@
 								<li>
 									<p>
 										<label :for="`type-event-${idx}`">
-											<input v-model="newType" type="radio" name="card-type" :id="`type-event-${idx}`">Event
+											<input
+												type="radio"
+												name="card-type"
+												:id="`type-event-${idx}`"
+												v-model="newType"
+												value="event">
+												Event
 										</label>
 									</p>
 								</li>
 							</ul>
 
+							<!-- Card create action buttons -->
 							<ul class="card__action-list">
 								<li>
 									<button
 										type="submit"
-										class="button"
+										class="button button--save"
 										title="Click, then Press E for event, Press T for task, Press N for note">
 										Save
 									</button>
@@ -143,7 +142,7 @@
 								<li>
 									<button
 										type="button"
-										class="button"
+										class="button button--cancel"
 										@click="handleHideAdd()"
 										title="Click, then Press E for event, Press T for task, Press N for note">
 										Cancel
@@ -173,7 +172,7 @@ export default {
 			addingCardActive: false,
 			addingCardIndex: null,
 			newTitle: '',
-			newType: null
+			newType: 'note',
 		}
 	},
 
@@ -182,14 +181,22 @@ export default {
     Draggable
 	},
 
+	directives: {
+		focus: {
+			inserted: function (el) {
+				el.focus()
+			}
+		}
+	},
 
 	watch: {
+		// Watch 'route' to trigger rebuild of scene.
     '$route' (to, from) {
 			if (from !== to) {
 				this.buildScene();
 			}
 		},
-		// Watch for cards state change, then call build.
+		// Watch 'cards' state to trigger rebuild of scene.
 		cards(newValue, oldValue) {
       if (newValue) {
 				this.buildScene();
@@ -197,16 +204,16 @@ export default {
     },
 	},
 
+	// Call async action
 	beforeCreate() {
 		this.$store.dispatch('getCardsOfThisMonth');
 	},
 
 	computed: {
-		// Build Scene
+		// Build local state from application state.
 		...mapState({
 			cards: state => state.cards
 		}),
-
 		daysInMonth() {
 			return getDaysInMonth(this.$route.params.year, this.$route.params.month);
 		},
@@ -223,16 +230,20 @@ export default {
 
 
 	methods: {
+		// Used in column class to signify is this column is today
 		isCurrentDay(idx) {
 			idx = idx + 1;
 			const isToday = getCurrentDay(Number(this.$route.params.year), Number(this.$route.params.month), idx);
 			return isToday
 		},
+		// Used in column title, format column title here
 		getDayTitle(idx) {
 			idx = idx + 1;
 			const weekday = DateTime.local(Number(this.$route.params.year), Number(this.$route.params.month), idx).weekdayShort;
 			return `${idx}. ${weekday}`
 		},
+		// Renable for auto-scrolling to today on load.
+		// call on on mount?
 		scrollToToday() {
 			// if (isCurrentMonth(Number(this.$route.params.year), Number(this.$route.params.month))) {
 			// 	let content = document.querySelector('#days-list');
@@ -241,25 +252,26 @@ export default {
 			// }
 		},
 
-
+		// Build main view of columns/cards
 		buildScene() {
+			// Get number of days by routes
 			const daysInMonth = getDaysInMonth(this.$route.params.year, this.$route.params.month);
 
+			// Days/Columns array (28-31~)
 			let daysArray = [];
 
-			// Build Scene for days of month.
+			// Build Scene for Days/Columns array
 			for (let i = 1; i < daysInMonth; i++) {
 				const cardsForToday = this.cards.filter(card => {
 					return (card.date.month_number == this.$route.params.month && card.date.day_number === i)
 				});
-
 				daysArray.push({
 					id: `${this.$route.params.month}-${i}`,
 					cards: cardsForToday,
 				});
 			}
 
-			// TODO: make Days have a unique ID so we can pass it to :key and force a rerender of the days.
+			// Set to state, render
 			this.scene = {
 				days: daysArray
 			};
@@ -268,38 +280,52 @@ export default {
 		// Card Create methods
 		/////////////////////////////////////
 
-		// Click "Add Card"
+		// show card create form
 		handleShowAdd(idx) {
 			this.addingCardActive = true;
 			this.addingCardIndex = idx;
 		},
+
+		// Hide card create form
 		handleHideAdd() {
 			this.addingCardActive = false;
 			this.addingCardIndex = null;
 		},
-		// Card Add Submit
+
+
+		// Card Create handle submit
 		handleCardFormSubmit() {
+			const currentDay = this.addingCardIndex + 1;
+			const currentMonth = Number(this.$route.params.month);
+			const currentYear = Number(this.$route.params.year);
+
+			// Validation
 			if (this.newTitle === '') {
 				console.log('title cannot be empty');
 
 				return;
 			}
 
+			// Call async action
 			this.$store.dispatch('createCardOnThisDay', {
 				title: this.newTitle,
-				type: 'note',
-				day: 1,
-				month: 3,
-				year: 2019,
+				type: this.newType,
+				day: currentDay,
+				month: currentMonth,
+				year: currentYear,
 			});
+
+			// Reset card create input
+			this.newTitle = '';
 		},
 
-		// Prevent Enter on textarea
+		// Card create textarea, prevent enter key, submit form
 		handleTextareaEnter(event) {
 			event.preventDefault()
 			this.handleCardFormSubmit()
 		},
 
+		// TODO: Add this to API?
 		// Save Reordering here!
 		handleDayChange: function(dayId, dayArray) {
       let cardIds = [];
@@ -335,7 +361,7 @@ export default {
       // }
 		},
 
-
+		// get cards by day/column ID
 		getCardPayload(dayId) {
 			return index => {
         return this.scene.days.filter(p => p.id === dayId)[0].cards[
@@ -344,6 +370,7 @@ export default {
       };
 		},
 
+		// handle drag n drop.
 		onCardDrop(columnId, dropResult) {
       if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
 				const scene = Object.assign({}, this.scene);
@@ -397,7 +424,16 @@ $card-column-width: 300px;
 		&.day-today {
 			border: 3px solid #008b00;
 		}
+
+		&:hover {
+			.button--add {
+				opacity: 1;
+			}
+		}
 	}
+}
+.button--add {
+	opacity: .2;
 }
 
 @media screen and (min-width: 600px) {
@@ -427,7 +463,12 @@ $card-column-width: 300px;
 
 .smooth-dnd-container {
 	min-height: 100px;
+	border: 1px solid #272727;
+	border-radius: 5px;
+	margin-bottom: 1rem;
 }
+
+
 // Card Styles
 /////////////////////////////////////
 $card-add--color: #333;
@@ -440,8 +481,9 @@ $card-add--color: #333;
 	-webkit-appearance: none;
 	width: 100%;
 	line-height: 24px;
-	align-items: center;
+	align-items: initial;
 	color: #fff;
+	border: 1px solid transparent;
 
 	.input, .text {
 		@extend .font-style;
@@ -470,7 +512,21 @@ $card-add--color: #333;
 			outline: 0px;
 		}
 	}
+	&:focus {
+		border: 1px dashed #545454;
+		outline: 0;
+	}
 }
+	.card--dragging {
+		background: #222222;
+		border: 1px dashed #ccc;
+		box-shadow: 0px 3px 3px -1px rgba(0,0,0,.6);
+	}
+	.card--dropping {
+		border: 1px dashed #545454;
+	}
+
+
 	.card-text {
 		display: inherit;
 	}
@@ -487,46 +543,65 @@ $card-add--color: #333;
 	}
 
 
-.button {
-	-webkit-appearance: none;
-	background: #fff;
-	border-radius: 5px;
-	line-height: 24px;
-	padding: 0 0.5rem;
-	border: 0;
-	cursor: pointer;
-}
+
+/// Buttons
+
 
 .button--add {
 	width: 100%;
-	// opacity: .2;
 	transition: opacity .2s ease-in-out;
-	margin-bottom: 1rem;
-	margin-top: 1rem;
+	background: #0000004d;
+	color: #fff;
 
 	&:hover,
   &:focus {
     opacity: 1;
   }
 }
-
-.flex {
-	display: flex;
+.button--add {
+	height: 3rem;
 }
+.button--save,
+.button--cancel {
+	font-size: 12px;
+	width: 100%;
+}
+.button--save {
+	background: #2bc77b;
+	color: #020101;
+}
+.button--cancel {
+	border: 1px solid #c72b2b;
+	color: #c72b2b;
+	background: transparent;
+}
+
+@media screen and (min-width: 600px) {
+	.button--save,
+	.button--cancel {
+		width: auto;
+	}
+}
+
+
+
 
 // Card Add form
 //////////////////////////////
 .input {
-	height: 24px;
+	height: 3rem;
 	width: 100%;
-	color:#333;
 	font-size: 1.1rem;
 	border: 0;
-	// background: transparent;
 	line-height: 24px;
 	width: 100%;
 	padding: .5rem;
-	margin:0;
+	margin: 0;
+	color: #fff;
+	background: #000;
+	border: 1px dashed #545454;
+	border-radius: 4px;
+	box-shadow: inset 0px 1px 4px #333;
 
 	&:focus {
 		outline: 0px;
@@ -553,29 +628,7 @@ $card-add--color: #333;
 
 	> li {
 		margin-right: .5rem;
-
-		> .button {
-			font-size: 14px;
-		}
 	}
 }
-
-
-// .button--card-type {
-// 	-webkit-appearance: none;
-// 	border: 1px solid #ccc;
-// 	border-radius: 50%;
-// 	height: 2rem;
-// 	width: 2rem;
-// 	padding: 0;
-// 	background: transparent;
-// 	color: #fff;
-// 	margin-right: .5rem;
-// }
-// 	.button--card-type--active {
-// 		background: #fff;
-// 		color: #333;
-// 	}
-
 </style>
 
