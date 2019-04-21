@@ -336,7 +336,27 @@ export default {
         const columnIndex = scene.days.indexOf(column);
         const newColumn = Object.assign({}, column);
         newColumn.cards = applyDrag(newColumn.cards, dropResult);
-        scene.days.splice(columnIndex, 1, newColumn);
+				scene.days.splice(columnIndex, 1, newColumn);
+
+				// const card = dropResult.payload;
+				const dayId = columnId.substr(columnId.length - 1);
+
+				console.log('dayId', dayId);
+				console.log('newColumn', newColumn);
+
+				// for each card in newColumn, update their dates.
+				newColumn.cards.forEach(card => {
+					const storeData = {
+						id: card.id,
+						day: dayId,
+						month: Number(this.$route.params.month),
+						year: Number(this.$route.params.year)
+					}
+					console.log('storeData', storeData);
+
+					// Call async action
+					this.$store.dispatch('editCardDate', storeData);
+				});
 
         // UI setting.
         this.scene = scene;

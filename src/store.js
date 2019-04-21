@@ -158,5 +158,46 @@ export default new Vuex.Store({
         console.error(error);
       }
     },
+
+    // Update Cards date
+    async editCardDate({ commit }, {id, day, month, year}) {
+      const endpoint = `https://9o9ra2vwl6.execute-api.us-east-1.amazonaws.com/Prod/cards?query=${encodeURIComponent(
+        `mutation {
+          updateCard(
+            id: "${id}",
+            input: {
+              date: {
+                day_number: ${day},
+                month_number: ${month},
+                year_number: ${year}
+              }
+            }
+          ){
+            id,
+            name,
+            type,
+            user_id
+            date {
+              day_number
+              month_number
+              year_number
+            }
+          }
+        }`
+      )}`;
+
+      try {
+        var result = await axios({
+            method: "GET",
+            url: endpoint ,
+            headers: {
+              'Content-Type': 'application/json',
+            }
+        });
+
+      } catch (error) {
+        console.error(error);
+      }
+    },
   }
 })
