@@ -1,5 +1,9 @@
 @import './reset.scss';
 
+body {
+	border: 5px solid #3e3e3e;
+	border-radius: 10px;
+}
 
 .clip {
 	position: absolute !important;

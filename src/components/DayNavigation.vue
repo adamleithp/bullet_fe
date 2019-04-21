@@ -341,9 +341,6 @@ export default {
 				// const card = dropResult.payload;
 				const dayId = columnId.substr(columnId.length - 1);
 
-				console.log('dayId', dayId);
-				console.log('newColumn', newColumn);
-
 				// for each card in newColumn, update their dates.
 				newColumn.cards.forEach(card => {
 					const storeData = {
@@ -352,7 +349,6 @@ export default {
 						month: Number(this.$route.params.month),
 						year: Number(this.$route.params.year)
 					}
-					console.log('storeData', storeData);
 
 					// Call async action
 					this.$store.dispatch('editCardDate', storeData);
@@ -370,7 +366,7 @@ export default {
 
 <style lang="scss">
 $card-column-width: 300px;
-
+$height-offset: 110px;
 // Card Styles
 /////////////////////////////////////
 
@@ -389,7 +385,7 @@ $card-column-width: 300px;
 		width: 100%;
 		flex: 0 0 100%;
 		scroll-snap-align: center;
-		height: calc(100vh - 100px);
+		height: calc(100vh - #{$height-offset});
 		overflow: scroll;
 
 		.title {
