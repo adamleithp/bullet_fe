@@ -41,6 +41,11 @@ export default new Vuex.Store({
     newCardAdded(state, card) {
       state.cards.push(card)
     },
+    cardEdited(state, updatedCard) {
+      // Get index position from ID, replace with updated data
+      var cardPosition = state.cards.map(function(x) {return x.id; }).indexOf(updatedCard.id);
+      state.cards.splice(cardPosition, 1, updatedCard);
+    },
   },
   actions: {
     async getCardsOfThisMonth({ commit }) {
@@ -102,6 +107,52 @@ export default new Vuex.Store({
         });
 
         commit('newCardAdded', result.data.data.createCard);
+        commit('isLoading', false);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    async editCardOnThisDay({ commit }, {id, title, type, day, month, year}) {
+      commit('isLoading', true);
+
+      const endpoint = `https://9o9ra2vwl6.execute-api.us-east-1.amazonaws.com/Prod/cards?query=${encodeURIComponent(
+        `mutation {
+          updateCard(
+            id: "${id}",
+            input: {
+              name: "${title}",
+              type: ${type},
+              date: {
+                day_number: ${day},
+                month_number: ${month},
+                year_number: ${year}
+              }
+            }
+          ){
+            id,
+            name,
+            type,
+            user_id
+            date {
+              day_number
+              month_number
+              year_number
+            }
+          }
+        }`
+      )}`;
+
+      try {
+        var result = await axios({
+            method: "GET",
+            url: endpoint ,
+            headers: {
+              'Content-Type': 'application/json',
+            }
+        });
+
+        commit('cardEdited', result.data.data.updateCard);
         commit('isLoading', false);
       } catch (error) {
         console.error(error);

@@ -21,8 +21,13 @@
 						v-for="(card) in day.cards"
 						:key="card.id"
 						drag-class="card--dragging">
-						<button class="card card--icon">
+
+						<button
+							class="card card--icon"
+							v-on:dblclick="handleClickToEdit(idx, card.id)"
+							v-if="edittingCardId !== card.id">
               <div class="flex">
+
 								<!-- This is for if you copy the column for exporting -->
 								<span class="clip">{{card.type}}:</span>
 
@@ -53,6 +58,20 @@
 							<!-- Card title -->
               <p class="text">{{card.name}}</p>
             </button>
+
+
+						<div v-if="edittingCardId === card.id">
+							<CardForm
+								formType="edit"
+								:dayIndex="idx"
+								:handleFormVisibility="handleHideEdit"
+								:cardId="card.id"
+								:cardTitle="card.name"
+								:cardType="card.type"
+							/>
+						</div>
+
+
 					</Draggable>
 				</Container>
 
@@ -71,86 +90,13 @@
 						</button>
 
 						<!-- Card create form -->
-						<form
-							v-if="addingCardIndex === idx"
-							v-on:submit.prevent="handleCardFormSubmit">
-
-							<textarea-autosize
-								class="input"
-								v-model="newTitle"
-								placeholder="type some text"
-								rows="1"
-								@keydown.native.13="handleTextareaEnter"
-								v-focus
-							></textarea-autosize>
-
-							<!-- Card create type radios -->
-							<ul class="card__type-list">
-								<li>
-									<p>
-										<label :for="`type-note-${idx}`">
-											<input
-												type="radio"
-												name="card-type"
-												:id="`type-note-${idx}`"
-												v-model="newType"
-												value="note">
-												Note
-										</label>
-									</p>
-								</li>
-
-								<li>
-									<p>
-										<label :for="`type-task-${idx}`">
-											<input
-												type="radio"
-												name="card-type"
-												:id="`type-task-${idx}`"
-												v-model="newType"
-												value="task">
-												Task
-										</label>
-									</p>
-								</li>
-
-								<li>
-									<p>
-										<label :for="`type-event-${idx}`">
-											<input
-												type="radio"
-												name="card-type"
-												:id="`type-event-${idx}`"
-												v-model="newType"
-												value="event">
-												Event
-										</label>
-									</p>
-								</li>
-							</ul>
-
-							<!-- Card create action buttons -->
-							<ul class="card__action-list">
-								<li>
-									<button
-										type="submit"
-										class="button button--save"
-										title="Click, then Press E for event, Press T for task, Press N for note">
-										Save
-									</button>
-								</li>
-								<li>
-									<button
-										type="button"
-										class="button button--cancel"
-										@click="handleHideAdd()"
-										title="Click, then Press E for event, Press T for task, Press N for note">
-										Cancel
-									</button>
-								</li>
-							</ul>
-
-						</form>
+						<div v-if="addingCardIndex === idx">
+							<CardForm
+								formType="create"
+								:dayIndex="idx"
+								:handleFormVisibility="handleHideAdd"
+							/>
+						</div>
 					</li>
 				</ul>
 			</li>
@@ -163,6 +109,7 @@ import { mapState } from 'vuex';
 import { DateTime } from 'luxon';
 import { Container, Draggable } from "vue-smooth-dnd";
 import { getDaysInMonth, getCurrentDay, getCurrentMonth, getCurrentYear, applyDrag } from '@/common';
+import CardForm from '@/components/CardForm.vue';
 
 export default {
 	name: 'DayNavigation',
@@ -171,27 +118,22 @@ export default {
 			scene: [],
 			addingCardActive: false,
 			addingCardIndex: null,
-			newTitle: '',
-			newType: 'note',
+			edittingCardActive: false,
+			edittingCardId: null,
+			// newTitle: '',
+			// newType: 'note',
 		}
 	},
 
 	components: {
     Container,
-    Draggable
-	},
-
-	directives: {
-		focus: {
-			inserted: function (el) {
-				el.focus()
-			}
-		}
+		Draggable,
+		CardForm
 	},
 
 	watch: {
 		// Watch 'route' to trigger rebuild of scene.
-    '$route' (to, from) {
+    '$route'(to, from) {
 			if (from !== to) {
 				this.buildScene();
 			}
@@ -199,6 +141,7 @@ export default {
 		// Watch 'cards' state to trigger rebuild of scene.
 		cards(to) {
       if (to) {
+				// TODO: Optimization opt; Diff only necesary becuase this causes a full rebuild of cards...
 				this.buildScene();
       }
     },
@@ -277,13 +220,13 @@ export default {
 			};
 		},
 
-		// Card Create methods
+		// Card
 		/////////////////////////////////////
 
 		// show card create form
-		handleShowAdd(idx) {
+		handleShowAdd(dayIndex) {
 			this.addingCardActive = true;
-			this.addingCardIndex = idx;
+			this.addingCardIndex = dayIndex;
 		},
 
 		// Hide card create form
@@ -292,45 +235,61 @@ export default {
 			this.addingCardIndex = null;
 		},
 
-
-		// Card Create handle submit
-		handleCardFormSubmit() {
-			const currentDay = this.addingCardIndex + 1;
-			const currentMonth = Number(this.$route.params.month);
-			const currentYear = Number(this.$route.params.year);
-
-			// Validation
-			if (this.newTitle === '') {
-				// TODO: error validation
-				return;
-			}
-
-			// Call async action
-			this.$store.dispatch('createCardOnThisDay', {
-				title: this.newTitle,
-				type: this.newType,
-				day: currentDay,
-				month: currentMonth,
-				year: currentYear,
-			});
-
-			// Reset card create input
-			this.newTitle = '';
+// Card click to edit handling
+		handleClickToEdit(dayIndex, cardId) {
+			this.handleShowEdit(cardId);
 		},
 
-		// Card create textarea, prevent enter key, submit form
-		handleTextareaEnter(event) {
-			event.preventDefault()
-			this.handleCardFormSubmit()
+		// show card create form
+		handleShowEdit(cardId) {
+			this.edittingCardActive = true;
+			this.edittingCardId = cardId;
 		},
+
+		// Hide card create form
+		handleHideEdit() {
+			this.edittingCardActive = false;
+			this.edittingCardId = null;
+		},
+
+		// // Card Create handle submit
+		// handleCardFormSubmit() {
+		// 	const currentDay = this.addingCardIndex + 1;
+		// 	const currentMonth = Number(this.$route.params.month);
+		// 	const currentYear = Number(this.$route.params.year);
+
+		// 	// Validation
+		// 	if (this.newTitle === '') {
+		// 		// TODO: error validation
+		// 		return;
+		// 	}
+
+		// 	// Call async action
+		// 	this.$store.dispatch('createCardOnThisDay', {
+		// 		title: this.newTitle,
+		// 		type: this.newType,
+		// 		day: currentDay,
+		// 		month: currentMonth,
+		// 		year: currentYear,
+		// 	});
+
+		// 	// Reset card create input
+		// 	this.newTitle = '';
+		// },
+
+		// // Card create textarea, prevent enter key, submit form
+		// handleTextareaEnter(event) {
+		// 	event.preventDefault()
+		// 	this.handleCardFormSubmit()
+		// },
 
 		// TODO: Add this to API?
 		// Save Reordering here!
-		handleDayChange: function(dayId, dayArray) {
-      let cardIds = [];
-      for (let i = 0; i < dayArray.length; i++) {
-        cardIds.push(dayArray[i].id);
-			}
+		// handleDayChange: function(dayId, dayArray) {
+    //   let cardIds = [];
+    //   for (let i = 0; i < dayArray.length; i++) {
+    //     cardIds.push(dayArray[i].id);
+		// 	}
 
 			// console.log(cardIds, cardIds);
 
@@ -358,7 +317,7 @@ export default {
       // } catch (e) {
       //   console.error();
       // }
-		},
+		// },
 
 		// get cards by day/column ID
 		getCardPayload(dayId) {
@@ -389,7 +348,7 @@ export default {
 </script>
 
 
-<style lang="scss" scoped>
+<style lang="scss">
 $card-column-width: 300px;
 
 // Card Styles
@@ -495,6 +454,12 @@ $card-add--color: #333;
 		text-align: left;
 	}
 
+	// .text {
+	// 	white-space: nowrap;
+	// 	overflow: hidden;
+	// 	text-overflow: ellipsis;
+	// }
+
 	.input {
 		height: 24px;
 		width: 100%;
@@ -520,6 +485,7 @@ $card-add--color: #333;
 		background: #222222;
 		border: 1px dashed #ccc;
 		box-shadow: 0px 3px 3px -1px rgba(0,0,0,.6);
+		overflow: hidden;
 	}
 	.card--dropping {
 		border: 1px dashed #545454;
@@ -544,8 +510,6 @@ $card-add--color: #333;
 
 
 /// Buttons
-
-
 .button--add {
 	width: 100%;
 	transition: opacity .2s ease-in-out;
