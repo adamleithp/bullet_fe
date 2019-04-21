@@ -68,8 +68,6 @@ export default new Vuex.Store({
     },
 
     async createCardOnThisDay({ commit }, {title, type, day, month, year}) {
-      console.log('called', title, type, day, month, year);
-
       commit('isLoading', true);
 
       const endpoint = `https://9o9ra2vwl6.execute-api.us-east-1.amazonaws.com/Prod/cards?query=${encodeURIComponent(

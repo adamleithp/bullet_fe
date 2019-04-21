@@ -1,8 +1,9 @@
 @import './reset.scss';
+$height-offset: 10px;
 
 body {
 	border: 5px solid #3e3e3e;
-	border-radius: 10px;
+	border-radius: $height-offset;
 }
 
 .clip {
@@ -14,6 +15,12 @@ body {
 .flex {
 	display: flex;
 }
+
+.w100 {
+	width: 100%;
+}
+
+
 
 .button {
 	-webkit-appearance: none;
