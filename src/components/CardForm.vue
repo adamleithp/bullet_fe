@@ -58,11 +58,11 @@
 		</ul>
 
 		<!-- Card create action buttons -->
-		<ul class="card__action-list">
+		<ul class="flex card__action-list">
 			<li>
 				<button
 					type="submit"
-					class="button button--save"
+					class="button button--primary"
 					title="Click, then Press E for event, Press T for task, Press N for note">
 					Save
 				</button>
@@ -70,7 +70,7 @@
 			<li>
 				<button
 					type="button"
-					class="button button--cancel"
+					class="button button--secondary"
 					@click="handleFormVisibility(false)"
 					title="Click, then Press E for event, Press T for task, Press N for note">
 					Cancel
@@ -177,7 +177,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .form {
 	margin-bottom: 1rem;
 }

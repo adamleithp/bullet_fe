@@ -523,8 +523,6 @@ $card-add--color: #333;
 		}
 	}
 
-
-
 /// Buttons
 .button--add {
 	width: 100%;
@@ -540,52 +538,9 @@ $card-add--color: #333;
 .button--add {
 	height: 3rem;
 }
-.button--save,
-.button--cancel {
-	font-size: 12px;
-	width: 100%;
-}
-.button--save {
-	background: #2bc77b;
-	color: #020101;
-}
-.button--cancel {
-	border: 1px solid #c72b2b;
-	color: #c72b2b;
-	background: transparent;
-}
-
-@media screen and (min-width: 600px) {
-	.button--save,
-	.button--cancel {
-		width: auto;
-	}
-}
-
-
-
 
 // Card Add form
-//////////////////////////////
-.input {
-	height: 3rem;
-	width: 100%;
-	font-size: 1.1rem;
-	border: 0;
-	line-height: 24px;
-	width: 100%;
-	padding: .5rem;
-	margin: 0;
-	color: #fff;
-	background: #000;
-	border: 1px dashed #545454;
-	border-radius: 4px;
-	box-shadow: inset 0px 1px 4px #333;
-
-	&:focus {
-		outline: 0px;
-	}
-}
+/////////////////////////////
 
 .card__type-list {
 	display: flex;
@@ -601,10 +556,7 @@ $card-add--color: #333;
 		}
 	}
 }
-
 .card__action-list {
-	display: flex;
-
 	> li {
 		margin-right: .5rem;
 	}

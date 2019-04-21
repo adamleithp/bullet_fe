@@ -4,9 +4,26 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
-import querystring from 'querystring'
 
 Vue.use(Vuex)
+
+
+function authHeader() {
+  // return authorization header with jwt token
+  let user = JSON.parse(localStorage.getItem('user')); // change this to token
+
+  if (user && user.id) {
+      return {
+        'Content-Type': 'application/json',
+        // 'Authorization': 'Bearer ' + user.id
+      };
+  } else {
+      return {
+        'Content-Type': 'application/json',
+      };
+  }
+}
+
 
 const getCardsQuery = `{
   getCards {
@@ -25,15 +42,27 @@ const getCardsQuery = `{
   }
 }`;
 
+const user = JSON.parse(localStorage.getItem('user'));
 
 export default new Vuex.Store({
   state: {
     loading: false,
+    user: user ? user : null,
     cards: null,
   },
   mutations: {
     isLoading(state, loading) {
       state.loading = loading;
+    },
+    updateUser(state, user) {
+      state.user = user;
+      localStorage.setItem('token', JSON.stringify(user.id));
+      localStorage.setItem('user', JSON.stringify(user));
+    },
+    logoutUser(state) {
+      state.user = null,
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
     },
     setMonthCards(state, cards) {
       state.cards = cards;
@@ -56,9 +85,7 @@ export default new Vuex.Store({
         var result = await axios({
             method: "GET",
             url: endpoint ,
-            headers: {
-              'Content-Type': 'application/json',
-            }
+            headers: authHeader()
         });
         commit('setMonthCards', result.data.data.getCards);
         commit('isLoading', false);
@@ -66,6 +93,98 @@ export default new Vuex.Store({
         console.error(error);
       }
     },
+
+
+    async logoutUser({ commit }) {
+      commit('logoutUser');
+    },
+
+
+    async createUser({ commit }, { email, password }) {
+      commit('isLoading', true);
+
+      const endpoint = `https://9o9ra2vwl6.execute-api.us-east-1.amazonaws.com/Prod/users?query=${encodeURIComponent(
+        `mutation {
+          createUser(
+            input: {
+              email: "${email}",
+              password: "${password}"
+            }
+          ){
+            id,
+            email,
+          }
+        }`
+      )}`;
+
+      try {
+        var result = await axios({
+            method: "GET",
+            url: endpoint,
+            headers: {
+              'Content-Type': 'application/json',
+            }
+        });
+
+        const response = result.data;
+
+        if (response.errors) {
+          console.log(response.errors[0].message);
+          return;
+        }
+
+        commit('updateUser', response.data.createUser);
+        commit('isLoading', false);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+
+    async loginUser({ commit }, { email, password }) {
+      commit('isLoading', true);
+
+      console.log('there is no login endpoint yet');
+
+
+      // const endpoint = `https://9o9ra2vwl6.execute-api.us-east-1.amazonaws.com/Prod/users?query=${encodeURIComponent(
+      //   `mutation {
+      //     createUser(
+      //       input: {
+      //         email: "${email}",
+      //         password: "${password}"
+      //       }
+      //     ){
+      //       id,
+      //       email,
+      //     }
+      //   }`
+      // )}`;
+
+      try {
+      //   var result = await axios({
+      //       method: "GET",
+      //       url: endpoint,
+      //       headers: {
+      //         'Content-Type': 'application/json',
+      //       }
+      //   });
+
+      //   const response = result.data;
+
+      //   if (response.errors) {
+      //     console.log(response.errors[0].message);
+      //     return;
+      //   }
+
+      //   commit('updateUser', response.data.createUser);
+        commit('isLoading', false);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+
 
     async createCardOnThisDay({ commit }, {title, type, day, month, year}) {
       commit('isLoading', true);
@@ -99,9 +218,7 @@ export default new Vuex.Store({
         var result = await axios({
             method: "GET",
             url: endpoint ,
-            headers: {
-              'Content-Type': 'application/json',
-            }
+            headers: authHeader()
         });
 
         commit('newCardAdded', result.data.data.createCard);
@@ -110,6 +227,10 @@ export default new Vuex.Store({
         console.error(error);
       }
     },
+
+
+
+
 
     async editCardOnThisDay({ commit }, {id, title, type, day, month, year}) {
       commit('isLoading', true);
@@ -145,9 +266,7 @@ export default new Vuex.Store({
         var result = await axios({
             method: "GET",
             url: endpoint ,
-            headers: {
-              'Content-Type': 'application/json',
-            }
+            headers: authHeader()
         });
 
         commit('cardEdited', result.data.data.updateCard);
@@ -156,6 +275,10 @@ export default new Vuex.Store({
         console.error(error);
       }
     },
+
+
+
+
 
     // Update Cards date
     async editCardDate({ commit }, {id, day, month, year}) {
@@ -188,9 +311,7 @@ export default new Vuex.Store({
         var result = await axios({
             method: "GET",
             url: endpoint ,
-            headers: {
-              'Content-Type': 'application/json',
-            }
+            headers: authHeader()
         });
 
       } catch (error) {

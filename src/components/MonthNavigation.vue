@@ -1,7 +1,7 @@
 <template>
 	<ul class="nav">
 		<li v-for="(month, idx) in months" :key="month">
-			<router-link :to="{ path: '/calendar/' + currentMonth + '/' + getDateIndex(idx) }">
+			<router-link class="link" :to="{ path: '/calendar/' + currentMonth + '/' + getDateIndex(idx) }">
 				{{capitalizeMonth(month)}}
 			</router-link>
 		</li>
