@@ -197,8 +197,8 @@ export default {
 			}
 		},
 		// Watch 'cards' state to trigger rebuild of scene.
-		cards(newValue, oldValue) {
-      if (newValue) {
+		cards(to) {
+      if (to) {
 				this.buildScene();
       }
     },
@@ -301,8 +301,7 @@ export default {
 
 			// Validation
 			if (this.newTitle === '') {
-				console.log('title cannot be empty');
-
+				// TODO: error validation
 				return;
 			}
 
