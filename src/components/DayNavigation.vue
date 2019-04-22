@@ -384,24 +384,24 @@ $height-offset: 110px;
   overflow: auto;
   flex: none;
   width: 100%;
+	padding: 0;
   flex-flow: row nowrap;
 	-webkit-overflow-scrolling: touch;
   -webkit-scroll-snap-type: x mandatory;
   	  -ms-scroll-snap-type: x mandatory;
           scroll-snap-type: x mandatory;
-	padding: 0;
 
 	> li {
 		padding: 1rem;
 		width: $card-column-width;
 		width: 100%;
 		flex: 0 0 100%;
-		-webkit-scroll-snap-align: center;
-		    -ms-scroll-snap-align: center;
-						scroll-snap-align: center;
 		height: calc(100vh - #{$height-offset});
 		overflow: scroll;
 		opacity: 0;
+		-webkit-scroll-snap-align: center;
+		    -ms-scroll-snap-align: center;
+						scroll-snap-align: center;
 
 		.title {
 			font-size: 1.5rem;
