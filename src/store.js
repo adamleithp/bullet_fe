@@ -70,13 +70,9 @@ export default new Vuex.Store({
     },
     refreshCards(state) {
       state.refresh = true;
-      const cards = state.cards;
-      state.cards = cards;
-      console.log(state.refresh);
 
       setTimeout(() => {
         state.refresh = false;
-        console.log(state.refresh);
       }, 1);
     },
     newCardAdded(state, card) {
