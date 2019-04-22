@@ -1,6 +1,6 @@
 <template>
   <div>
-		<ul id="days-list" class="day-list">
+		<ul class="day-list">
 			<li
 				v-for="(day, idx) in scene.days" :key="`${day.id}`"
 				:class="{
@@ -364,6 +364,20 @@ $card-column-width: 300px;
 $height-offset: 110px;
 // Card Styles
 /////////////////////////////////////
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@for $i from 1 through 32 {
+	.day-list > li:nth-of-type(#{$i}) {
+		animation: fadein .2s #{$i/17}s forwards;
+	}
+}
+
+
+
+
 
 .day-list {
 	display: flex;
@@ -371,7 +385,10 @@ $height-offset: 110px;
   flex: none;
   width: 100%;
   flex-flow: row nowrap;
-  scroll-snap-type: x mandatory;
+	-webkit-overflow-scrolling: touch;
+  -webkit-scroll-snap-type: x mandatory;
+  	  -ms-scroll-snap-type: x mandatory;
+          scroll-snap-type: x mandatory;
 	padding: 0;
 
 	> li {
@@ -379,9 +396,12 @@ $height-offset: 110px;
 		width: $card-column-width;
 		width: 100%;
 		flex: 0 0 100%;
-		scroll-snap-align: center;
+		-webkit-scroll-snap-align: center;
+		    -ms-scroll-snap-align: center;
+						scroll-snap-align: center;
 		height: calc(100vh - #{$height-offset});
 		overflow: scroll;
+		opacity: 0;
 
 		.title {
 			font-size: 1.5rem;
@@ -407,7 +427,9 @@ $height-offset: 110px;
 
 @media screen and (min-width: 600px) {
   .day-list {
-		scroll-snap-type: none;
+		-webkit-scroll-snap-type: none;
+				-ms-scroll-snap-type: none;
+						scroll-snap-type: none;
 
 		> li {
 			flex: 0 0 50%;

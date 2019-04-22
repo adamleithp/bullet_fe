@@ -70,6 +70,7 @@ $height-offset: 10px;
 body {
 	border: 5px solid #3e3e3e;
 	border-radius: $height-offset;
+	height: 100vh;
 }
 
 .clip {
@@ -184,6 +185,7 @@ body {
 .nav {
 	display: flex;
 	flex: none;
+	-webkit-overflow-scrolling: touch;
 	// width: 100%;
 
 	> li {
