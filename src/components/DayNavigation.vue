@@ -21,7 +21,8 @@
 					@drop="(e) => onCardDrop(day.id, e)"
 					drag-class="card--dragging"
 					drop-class="card--dropping"
-					:get-child-payload="getCardPayload(day.id)">
+					:get-child-payload="getCardPayload(day.id)"
+					drag-handle-selector=".card">
 
 					<Draggable
 						v-for="(card) in day.cards"
