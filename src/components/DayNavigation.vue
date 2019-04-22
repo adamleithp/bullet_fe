@@ -1,10 +1,15 @@
 <template>
   <div>
-
 		<ul id="days-list" class="day-list">
 			<li
 				v-for="(day, idx) in scene.days" :key="`${day.id}`"
-				:class="{'day-today': isCurrentDay(idx)}">
+				:class="{
+					'day-today': isCurrentDay(idx),
+					'day-is-clicked': dayClicked === idx,
+					'card-on-clipboard': cardOnClipboard ? true : false,
+				}"
+				v-on:click="handleCardListClick(idx)"
+				@paste="handleCardPaste()">
 
 				<!-- Column title -->
 				<h1 class="title">{{getDayTitle(idx)}}</h1>
@@ -17,6 +22,7 @@
 					drag-class="card--dragging"
 					drop-class="card--dropping"
 					:get-child-payload="getCardPayload(day.id)">
+
 					<Draggable
 						v-for="(card) in day.cards"
 						:key="card.id"
@@ -24,8 +30,12 @@
 
 						<button
 							class="card card--icon"
+							@keydown.meta.88="handleCardCut(card.id)"
 							v-on:dblclick="handleClickToEdit(idx, card.id)"
-							v-if="edittingCardId !== card.id">
+							v-if="edittingCardId !== card.id"
+							:class="{
+								'card--is-cut': cardOnClipboard ? (cardOnClipboard.id === card.id) : false,
+							}">
               <div class="flex">
 
 								<!-- This is for if you copy the column for exporting -->
@@ -76,7 +86,7 @@
 				</Container>
 
 				<!-- Card Create -->
-				<ul class="cards-list">
+				<ul>
 					<li>
 
 						<!-- Click to show form -->
@@ -120,6 +130,8 @@ export default {
 			addingCardIndex: null,
 			edittingCardActive: false,
 			edittingCardId: null,
+			dayClicked: null,
+			cardOnClipboard: null,
 			// newTitle: '',
 			// newType: 'note',
 		}
@@ -138,13 +150,22 @@ export default {
 				this.buildScene();
 			}
 		},
+
 		// Watch 'cards' state to trigger rebuild of scene.
 		cards(to) {
       if (to) {
 				// TODO: Optimization opt; Diff only necesary becuase this causes a full rebuild of cards...
 				this.buildScene();
       }
-    },
+		},
+
+		// Watch 'refresh' state to trigger rebuild of scene.
+		refresh(from, to) {
+			if (from !== to) {
+				this.$store.dispatch('getCardsOfThisMonth');
+				this.cardOnClipboard = null;
+			}
+		},
 	},
 
 	// Call async action
@@ -155,7 +176,8 @@ export default {
 	computed: {
 		// Build local state from application state.
 		...mapState({
-			cards: state => state.cards
+			cards: state => state.cards,
+			refresh: state => state.refresh
 		}),
 		daysInMonth() {
 			return getDaysInMonth(this.$route.params.year, this.$route.params.month);
@@ -252,72 +274,43 @@ export default {
 			this.edittingCardId = null;
 		},
 
-		// // Card Create handle submit
-		// handleCardFormSubmit() {
-		// 	const currentDay = this.addingCardIndex + 1;
-		// 	const currentMonth = Number(this.$route.params.month);
-		// 	const currentYear = Number(this.$route.params.year);
-
-		// 	// Validation
-		// 	if (this.newTitle === '') {
-		// 		// TODO: error validation
-		// 		return;
-		// 	}
-
-		// 	// Call async action
-		// 	this.$store.dispatch('createCardOnThisDay', {
-		// 		title: this.newTitle,
-		// 		type: this.newType,
-		// 		day: currentDay,
-		// 		month: currentMonth,
-		// 		year: currentYear,
-		// 	});
-
-		// 	// Reset card create input
-		// 	this.newTitle = '';
-		// },
-
-		// // Card create textarea, prevent enter key, submit form
-		// handleTextareaEnter(event) {
-		// 	event.preventDefault()
-		// 	this.handleCardFormSubmit()
-		// },
-
-		// TODO: Add this to API?
-		// Save Reordering here!
-		// handleDayChange: function(dayId, dayArray) {
-    //   let cardIds = [];
-    //   for (let i = 0; i < dayArray.length; i++) {
-    //     cardIds.push(dayArray[i].id);
-		// 	}
-
-			// console.log(cardIds, cardIds);
 
 
-      // try {
-      //   this.$apollo.mutate({
-      //     mutation: gql`
-      //       mutation editEventPosition($day_id: String, $day_array: [String]) {
-      //         editEventPosition(day_id: $day_id, day_array: $day_array) {
-      //           id
-      //           title
-      //         }
-      //       }
-      //     `,
-      //     variables: {
-      //       day_id: dayId,
-      //       day_array: EventsIds
-      //     },
-      //     update: (store, { data: { editEventPosition } }) => {
-			// 			console.log('success');
+		// save day that's clicked as currnet
+		handleCardListClick(dayIndex) {
+			if (this.dayClicked === dayIndex) return;
 
-      //       // this.resetCardAdding();
-      //     }
-      //   });
-      // } catch (e) {
-      //   console.error();
-      // }
-		// },
+			this.dayClicked = dayIndex
+		},
+
+
+
+		// save card data selected white CMD+X
+		handleCardCut(cardId) {
+			if (this.cardOnClipboard === cardId) return;
+
+			const thisCard = this.cards.filter(card => {
+				return card.id === cardId
+			});
+
+			this.cardOnClipboard = thisCard[0]
+		},
+
+
+		handleCardPaste() {
+			if (!this.cardOnClipboard) return;
+
+			const storeData = {
+				render: true,
+				id: this.cardOnClipboard.id,
+				day: this.dayClicked + 1,
+				month: Number(this.$route.params.month),
+				year: Number(this.$route.params.year)
+			}
+
+			// Call async action
+			this.$store.dispatch('editCardDate', storeData);
+		},
 
 		// get cards by day/column ID
 		getCardPayload(dayId) {
@@ -344,6 +337,7 @@ export default {
 				// for each card in newColumn, update their dates.
 				newColumn.cards.forEach(card => {
 					const storeData = {
+						render: false,
 						id: card.id,
 						day: dayId,
 						month: Number(this.$route.params.month),
@@ -435,17 +429,41 @@ $height-offset: 110px;
 
 
 
-.smooth-dnd-container {
+.cards-list {
 	min-height: 100px;
 	border: 1px solid #272727;
 	border-radius: 5px;
 	margin-bottom: 1rem;
+	transition: border .1s .1s linear;
+
+	&:focus {
+		border: 1px solid red;
+	}
+	.day-is-clicked & {
+		border: 1px solid #333;
+
+	}
+	.day-is-clicked.card-on-clipboard & {
+		&:after {
+			position: absolute;
+			top: 0;
+			right: 0;
+			color: #fff;
+			opacity: .3;
+			content: 'CTRL+V to paste';
+			line-height: 10px;
+			padding: 2px;
+			border: 1px solid #444;
+			border-radius: 3px;
+		}
+	}
 }
 
 
 // Card Styles
 /////////////////////////////////////
 $card-add--color: #333;
+
 
 .card {
 	padding: 0.5rem;
@@ -458,6 +476,7 @@ $card-add--color: #333;
 	align-items: initial;
 	color: #fff;
 	border: 1px solid transparent;
+	transition: border .1s linear;
 
 	.input, .text {
 		@extend .font-style;
@@ -505,6 +524,24 @@ $card-add--color: #333;
 	}
 	.card--dropping {
 		border: 1px dashed #545454;
+	}
+	.card--is-cut {
+		position: relative;
+		background: #333;
+    z-index: 1;
+
+		&:after {
+			position: absolute;
+			opacity: .3;
+			top: 0;
+			right: 0;
+			color: #fff;
+			content: 'CUT';
+			line-height: 10px;
+			padding: 2px;
+			border: 1px solid #444;
+			border-radius: 3px;
+		}
 	}
 
 

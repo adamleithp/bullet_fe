@@ -49,6 +49,7 @@ export default new Vuex.Store({
     loading: false,
     user: user ? user : null,
     cards: null,
+    refresh: false,
   },
   mutations: {
     isLoading(state, loading) {
@@ -66,6 +67,17 @@ export default new Vuex.Store({
     },
     setMonthCards(state, cards) {
       state.cards = cards;
+    },
+    refreshCards(state) {
+      state.refresh = true;
+      const cards = state.cards;
+      state.cards = cards;
+      console.log(state.refresh);
+
+      setTimeout(() => {
+        state.refresh = false;
+        console.log(state.refresh);
+      }, 1);
     },
     newCardAdded(state, card) {
       state.cards.push(card)
@@ -281,7 +293,7 @@ export default new Vuex.Store({
 
 
     // Update Cards date
-    async editCardDate({ commit }, {id, day, month, year}) {
+    async editCardDate({ commit }, { render, id, day, month, year }) {
       const endpoint = `https://9o9ra2vwl6.execute-api.us-east-1.amazonaws.com/Prod/cards?query=${encodeURIComponent(
         `mutation {
           updateCard(
@@ -313,6 +325,11 @@ export default new Vuex.Store({
             url: endpoint ,
             headers: authHeader()
         });
+
+
+        if (render) {
+          commit('refreshCards');
+        }
 
       } catch (error) {
         console.error(error);
